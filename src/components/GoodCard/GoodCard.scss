@@ -1,0 +1,14 @@
+.GoodCard {
+  display: flex;
+  gap: 4px;
+  width: fit-content;
+  padding: 5px;
+  border-radius: 8px;
+  background-color: #ddd;
+  &__title {
+    display: block;
+    font-size: 1.1rem;
+    margin: 0;
+    margin-bottom: 4px;
+  }
+}

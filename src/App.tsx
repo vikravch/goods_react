@@ -1,41 +1,64 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import './App.scss';
+import { MemoGoodsList } from './components/GoodsList/GoodsList';
+import { Good } from './types';
+import { MemoGoodsForm } from './components/GoodsForm/GoodsForm';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getAllGoods } from './data/goodsUseCases';
 
-interface Color {
-  id: number;
-  name: string;
-}
+export const App: React.FC = () => {
+  const [goods, setGoods] = useState<Good[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
 
-interface Good {
-  id: number;
-  name: string;
-  colorId: number;
-  color?: Color;
-}
+  useEffect(() => {
+    getAllGoods().then(list => setGoods(list));
+  }, []);
 
-const colors = [
-  { id: 1, name: 'red' },
-  { id: 2, name: 'green' },
-  { id: 3, name: 'blue' },
-];
+  const onHandleAddGood = (newGood: Good) => {
+    setGoods(stateGoods => [...stateGoods, newGood]);
+  };
 
-const goodsFromServer = [
-  { id: 1, colorId: 1, name: 'Dumplings' },
-  { id: 2, colorId: 2, name: 'Carrot' },
-  { id: 3, colorId: 3, name: 'Eggs' },
-  { id: 4, colorId: 1, name: 'Ice cream' },
-  { id: 5, colorId: 2, name: 'Apple' },
-  { id: 6, colorId: 3, name: 'Bread' },
-  { id: 7, colorId: 1, name: 'Fish' },
-  { id: 8, colorId: 2, name: 'Honey' },
-  { id: 9, colorId: 3, name: 'Jam' },
-  { id: 10, colorId: 1, name: 'Garlic' },
-];
+  const onHandleRemoveGood = useCallback((goodId: number) => {
+    setGoods(stateGoods => stateGoods.filter(good => good.id !== goodId));
+  }, []);
 
-export const App = () => {
+  const onHandleEditGood = useCallback((newGood: Good) => {
+    setGoods(stateGoods =>
+      stateGoods.map(good => (good.id === newGood.id ? newGood : good)),
+    );
+  }, []);
+
+  const onHandleSearchClicked = () => {
+    setSearchQuery(searchRef.current?.value || '');
+  };
+
+  const normalizeSearch = searchQuery.toLocaleLowerCase().trim();
+  const goodsAfterSearch = goods.filter(good =>
+    good.name.toLocaleLowerCase().includes(normalizeSearch),
+  );
+
   return (
     <div className="App">
       <h1>Goods</h1>
+      <div>
+        <input
+          type="text"
+          placeholder="Search"
+          ref={searchRef}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchQuery(event.target.value)
+          }
+        />
+        <button onClick={() => onHandleSearchClicked()}>Search</button>
+      </div>
+
+      <MemoGoodsList
+        goods={goodsAfterSearch}
+        onDelete={onHandleRemoveGood}
+        onUpdate={onHandleEditGood}
+      />
+      <MemoGoodsForm onAddGood={onHandleAddGood} />
     </div>
   );
 };
