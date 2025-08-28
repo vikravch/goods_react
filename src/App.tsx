@@ -4,7 +4,12 @@ import { MemoGoodsList } from './components/GoodsList/GoodsList';
 import { Good } from './types';
 import { MemoGoodsForm } from './components/GoodsForm/GoodsForm';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getAllGoods } from './data/goodsUseCases';
+import {
+  addGood,
+  deleteGood,
+  getAllGoods,
+  updateGood,
+} from './data/goodsUseCases';
 
 export const App: React.FC = () => {
   const [goods, setGoods] = useState<Good[]>([]);
@@ -15,18 +20,30 @@ export const App: React.FC = () => {
     getAllGoods().then(list => setGoods(list));
   }, []);
 
-  const onHandleAddGood = (newGood: Good) => {
-    setGoods(stateGoods => [...stateGoods, newGood]);
+  const onHandleAddGood = async (newGood: Good) => {
+    try {
+      await addGood(newGood);
+
+      setGoods(stateGoods => [...stateGoods, newGood]);
+    } catch (e) {}
   };
 
-  const onHandleRemoveGood = useCallback((goodId: number) => {
-    setGoods(stateGoods => stateGoods.filter(good => good.id !== goodId));
+  const onHandleRemoveGood = useCallback(async (goodId: number) => {
+    try {
+      await deleteGood(goodId);
+
+      setGoods(stateGoods => stateGoods.filter(good => good.id !== goodId));
+    } catch (e) {}
   }, []);
 
-  const onHandleEditGood = useCallback((newGood: Good) => {
-    setGoods(stateGoods =>
-      stateGoods.map(good => (good.id === newGood.id ? newGood : good)),
-    );
+  const onHandleEditGood = useCallback(async (newGood: Good) => {
+    try {
+      await updateGood(newGood);
+
+      setGoods(stateGoods =>
+        stateGoods.map(good => (good.id === newGood.id ? newGood : good)),
+      );
+    } catch (e) {}
   }, []);
 
   const onHandleSearchClicked = () => {

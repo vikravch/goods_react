@@ -21,6 +21,18 @@ export async function getAllGoods(): Promise<Good[]> {
   return goodsListRes;
 }
 
+export function addGood(newGood: Omit<Good, 'id'>) {
+  return repository.addGood(newGood);
+}
+
+export function updateGood(newGood: Good) {
+  return repository.updateGood(newGood);
+}
+
+export function deleteGood(goodId: number) {
+  return repository.removeGood(goodId);
+}
+
 /*const goodsWithColors: Good[] = goodsFromServer.map(good => ({
     ...good,
     color: getColorById(good.colorId),
